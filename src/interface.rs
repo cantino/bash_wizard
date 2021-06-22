@@ -200,6 +200,7 @@ impl<'a> Interface<'a> {
             self.selection = self.matches.len() - 1;
         }
 
+        let mut line_offset = 0;
         for (index, command) in self.matches.iter().enumerate() {
             let mut fg = if self.settings.lightmode {
                 color::Fg(color::Black).to_string()
@@ -228,24 +229,31 @@ impl<'a> Interface<'a> {
             }
 
             write!(screen, "{}{}", fg, bg).unwrap();
+            
+            let command_display = Interface::truncate_for_display(
+                command,
+                &self.input.command,
+                width,
+                highlight,
+                fg,
+                self.debug
+            );
 
-            write!(
-                screen,
-                "{}{}",
-                cursor::Goto(1, index as u16 + RESULTS_TOP_INDEX),
-                Interface::truncate_for_display(
-                    command,
-                    &self.input.command,
-                    width,
-                    highlight,
-                    fg,
-                    self.debug
+            let mut lines_count = 0;
+
+            for line in command_display.lines() {
+                write!(
+                    screen,
+                    "{}{}",
+                    cursor::Goto(1, RESULTS_TOP_INDEX + (line_offset as u16) + (lines_count as u16)),
+                    line
                 )
-            )
-            .unwrap();
+                .unwrap();
+                lines_count += 1;
+            }
 
             if command.last_run.is_some() {
-                write!(screen, "{}", cursor::Goto(width - 9, index as u16 + RESULTS_TOP_INDEX)).unwrap();
+                write!(screen, "{}", cursor::Goto(width - 9, RESULTS_TOP_INDEX + (line_offset as u16))).unwrap();
 
                 let duration = &format_duration(
                     Duration::minutes(
@@ -287,6 +295,8 @@ impl<'a> Interface<'a> {
 
             write!(screen, "{}", color::Bg(color::Reset)).unwrap();
             write!(screen, "{}", color::Fg(color::Reset)).unwrap();
+
+            line_offset += lines_count;
         }
         screen.flush().unwrap();
     }
@@ -589,7 +599,7 @@ impl<'a> Interface<'a> {
         width: u16,
         highlight_color: String,
         base_color: String,
-        debug: bool,
+        debug: bool
     ) -> String {
         let mut prev: usize = 0;
         let debug_space = if debug { 90 } else { 0 };
