@@ -64,7 +64,7 @@ else
   PROMPT_COMMAND="mcfly_prompt_command;${PROMPT_COMMAND#;}"
 fi
 
-# If this is an interactive shell, take ownership of ctrl-r.
+# If this is an interactive shell, take ownership of ctrl-r and set terminal color.
 if [[ $- =~ .*i.* ]]; then
   if [[ ${BASH_VERSINFO[0]} -ge 4 ]]; then
     # shellcheck disable=SC2016
@@ -82,5 +82,11 @@ if [[ $- =~ .*i.* ]]; then
     else
       bind "'\C-r': '\C-amcfly: \e# mcfly search\C-m'"
     fi
+  fi
+
+  if [[ "$COLORFGBG" =~ \;15$ ]]; then
+    export MCFLY_LIGHT=TRUE
+  elif [[ "$TERM_PROGRAM" == "Apple_Terminal" && $(defaults read -g AppleInterfaceStyle 2> /dev/null) != 'Dark' ]]; then
+    export MCFLY_LIGHT=TRUE
   fi
 fi
