@@ -472,7 +472,11 @@ impl<'a> Interface<'a> {
             }
             Key::F(2) => {
                 if !self.matches.is_empty() {
-                    self.menu_mode = MenuMode::ConfirmDelete;
+                    if self.settings.delete_without_confirm {
+                        self.delete_selection();
+                    } else {
+                        self.menu_mode = MenuMode::ConfirmDelete;
+                    }
                 }
             }
             _ => {}
@@ -522,7 +526,11 @@ impl<'a> Interface<'a> {
                 }
                 Key::F(2) => {
                     if !self.matches.is_empty() {
-                        self.menu_mode = MenuMode::ConfirmDelete;
+                        if self.settings.delete_without_confirm {
+                            self.delete_selection();
+                        } else {
+                            self.menu_mode = MenuMode::ConfirmDelete;
+                        }
                     }
                 }
                 _ => {}
@@ -574,7 +582,11 @@ impl<'a> Interface<'a> {
                 }
                 Key::F(2) => {
                     if !self.matches.is_empty() {
-                        self.menu_mode = MenuMode::ConfirmDelete;
+                        if self.settings.delete_without_confirm {
+                            self.delete_selection();
+                        }else{
+                            self.menu_mode = MenuMode::ConfirmDelete;
+                        }
                     }
                 }
                 _ => {}
